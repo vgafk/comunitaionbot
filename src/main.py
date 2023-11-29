@@ -1,12 +1,22 @@
-from aiogram import Bot, Dispatcher, types
+import asyncio
+import logging
+
+from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
 
 from settings import API_TOKEN
+from hendlers import router
 
-bot = Bot(API_TOKEN)
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(storage=MemoryStorage())
+dp.include_router(router)
 
-dp = Dispatcher(bot)
+async def main():
+    await bot.delete_webhook(drop_pending_updates=True)
+
+    await dp.start_polling(bot)
 
 
-@dp.message_handler(commands=['start']) # Явно указываем в декораторе, на какую команду реагируем.
-async def send_welcome(message: types.Message):
-   await message.reply("Привет!\nЯ Эхо-бот от Skillbox!\nОтправь мне любое сообщение, а я тебе обязательно отвечу.") #Так как код работает асинхронно, то обязательно пишем await.
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(main())
